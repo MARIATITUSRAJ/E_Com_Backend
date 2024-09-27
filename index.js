@@ -6,7 +6,9 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
 
@@ -145,6 +147,19 @@ app.post("/login", async(req, res)=>{
     res.json({success: false, errors:"Incorrect Email Address"})
   }
 })
+
+const users = [{ id: 1, username: 'user', password: 'pass' }];
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username && u.password === password);
+  if (user) {
+    const token = jwt.sign({ id: user.id }, 'secret-ecom');
+    res.json({ token });
+  } else {
+    res.status(401).send('Invalid credentials');
+  }
+});
 
 app.post("/addproduct", async(req, res)=>{
   let products = await Product.find({});
