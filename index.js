@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cors());
 
 //Database Connection     
-mongoose.connect("mongodb+srv://Tritus:fD8eNam1NU4tXRUq@cluster.trghxbv.mongodb.net/Trendz");
+mongoose.connect("mongodb+srv://Tritus:g6GzEJpeAyiilmTC@cluster.trghxbv.mongodb.net/Trendz");
 mongoose.connection
 .once("open",() => console.log("DB Connected"))
 .on("error",(error)=>{
@@ -204,6 +204,57 @@ app.get("/allproducts", async(req, res)=>{
   console.log("All Products are Fetched");
   res.send(products);
 })
+
+//creating endpoint for new collections
+app.get('/newcollections', async(req,res)=> {
+  let produsts = await Product.find({});
+  let newcollection = products.slice(1).slice(8);
+  console.log("New Collections Fetched");
+  res.send(newcollection);
+
+})
+
+//creating Endpoint for popularin women
+app.get('/popularinwomen', async (req,res)=>{
+  let products = await Product.find({category:"women"});
+  let popular_in_women = products.slice(0,4);
+  console.log("Popular in Women Fetched");
+  res.send(Popular_in_Women);
+})
+
+//creating endpoint for adding products in cart data
+app.post('/addtocart', async(req,res)=>{
+  console.log(req.body);
+})
+
+
+//creating middleware to fetch user
+const fetchUser = async(req,res,next)=>{
+  const token = req.header('auth-token');
+  if (!token) {
+    res.status(401).send({errors:"Please authenticate using valid token"})
+  }
+}
+
+//creating endpoint for adding products in cartdata
+app.post('/addtocart',fetchUser,async (req,res)=>{
+   console.log("Added")
+  let userData = await Users.findOne({_id:req.user.id});
+  userData.cartData[req.body.item.id] += 1;
+  await Users.FindOneAndUpdate({_id:req.user.id},{cartData:userData})
+  res.send("Added")
+})
+
+//creating endpoint for remove product from cartdata
+app.post('/removefromcart',fetchUser,async (req,res)=>{
+   console.log ("Removed")
+  let userData = await Users.findOne({_id:req.user.id});
+  if(userData.cartData[req.body.itemId]>0)
+  userData.cartData[req.body.item.id] -= 1;
+  await Users.FindOneAndUpdate({_id:req.user.id},{cartData:userData})
+  res.send("Removed")
+})
+
 
 app.listen(port,(error)=>{
   if(!error){
