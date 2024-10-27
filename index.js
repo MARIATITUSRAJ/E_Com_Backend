@@ -13,25 +13,18 @@ app.use(express.json());
 app.use(cors());
 
 //Database Connection     
-mongoose.connect("mongodb+srv://Tritus:g6GzEJpeAyiilmTC@cluster.trghxbv.mongodb.net/Trendz");
+mongoose.connect("mongodb+srv://users:teQUqJDxxxNj6CR0@cluster.trghxbv.mongodb.net/Trendz");
 mongoose.connection
 .once("open",() => console.log("DB Connected"))
-.on("error",(error)=>{
-  console.log(`ERROR : ${error}`);
-})
-
+.on("error",(error)=>{console.log(`ERROR : ${error}`)})
 
 //API Creation
-app.get("/",(req, res)=>{
-  res.send("Express App is Running")
-})
+app.get("/",(req, res)=>{res.send("Express App is Running")})
 
 //Image Storage
 const storage = multer.diskStorage({
   destination: "./upload/images",
-  filename:(req, file, cb)=>{
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
-  }
+  filename:(req, file, cb)=>{return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)}
 })
 const upload = multer({storage:storage})
 
@@ -43,6 +36,7 @@ app.post("/upload", upload.single("product"),(req, res)=>{
     image_url: `http://localhost:${port}/images/${req.file.filename}`
   })
 })
+
 //Product Schema
 const Product = mongoose.model("Product",{
   id:{
@@ -211,7 +205,6 @@ app.get('/newcollections', async(req,res)=> {
   let newcollection = products.slice(1).slice(-8);
   console.log("New Collections Fetched");
   res.send(newcollection);
-
 })
 
 //creating Endpoint for popularin women
@@ -245,7 +238,7 @@ const fetchUser = async(req,res,next)=>{
 app.post('/addtocart',fetchUser,async (req,res)=>{
    console.log ("Added",req.body.itemId);
   let userData = await Users.findOne({_id:req.user.id});
-  userData.cartData[req.body.item.Id] += 1;
+  userData.cartData[req.body.itemId] += 1;
   await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
   res.send("Added")
 })
@@ -255,7 +248,7 @@ app.post('/removefromcart',fetchUser,async (req,res)=>{
    console.log ("Removed",req.body.itemId);
   let userData = await Users.findOne({_id:req.user.id});
   if(userData.cartData[req.body.itemId]>0)
-  userData.cartData[req.body.item.Id] -= 1;
+  userData.cartData[req.body.itemId] -= 1;
   await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
   res.send("Removed")
 })
@@ -266,9 +259,6 @@ app.post('/getcart',fetchUser,async (req,res)=>{
   let userData = await Users.findOne({_id:req.user.id})
   res.json(userData.cartData);
 })
-
-
-
 
 
 
